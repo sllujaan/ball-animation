@@ -1,26 +1,19 @@
 
 
 
-
+// dom vars 
 const parent = document.querySelectorAll(".parent")[0];
 const child = document.querySelectorAll(".child")[0];
 const indicatorCenterVertial = document.querySelectorAll(".indicator-center-vertical")[0];
 const indicatorCenterHorizontal = document.querySelectorAll(".indicator-center-horizontal")[0];
-var parentWidth = parseInt(window.getComputedStyle(parent).getPropertyValue("width"));
-var parentHeight = parseInt(window.getComputedStyle(parent).getPropertyValue("height"));
+var parentWidth;
+var parentHeight;
+var childWidth;
+var childHeight;
+var widthRatio;
+var heightRatio;
 
-const childWidth = parseInt(window.getComputedStyle(child).getPropertyValue("width"));
-const childHeight = parseInt(window.getComputedStyle(child).getPropertyValue("height"));
-
-var widthRatio = parentWidth / childWidth;
-var heightRatio = parentHeight / childHeight;
-
-const newWidthRatio = window.innerWidth / childWidth;
-
-const minTransformPercentage = 0;
-const maxTransformPercentage = 100 * widthRatio;
-
-
+// event vars
 var mouseMoveEvent = null;
 var isMouseMoving = false;
 var isAnimationPlaying = false;
@@ -31,53 +24,41 @@ var boxX = 0;
 var boxY = 0;
 const speed = 0.04;
 var rotation = 0;
-
 var mouseMoveTimer = null;
-var prevMousePercentageXParent = 0;
 
 
-// document.addEventListener("mousemove", e => {
-//     const mousePercentageX = (e.clientX / window.innerWidth) * 100;
-//     console.log(mousePercentageX);
-//     console.log(`${mousePercentageX}`);
-//     //console.log(`${mousePercentageX*widthRatio}`);
-
-//     var transformXPercentage = ((mousePercentageX - 8.9385) * newWidthRatio);
-
-//     if(transformXPercentage <= minTransformPercentage) transformXPercentage = minTransformPercentage;
-//     if(transformXPercentage >= maxTransformPercentage) transformXPercentage = maxTransformPercentage;
-
-
-//     child.style.setProperty("transform", `translate3d(${transformXPercentage}%, 0px, 0px)`);
-// });
-
-
-
-
-window.addEventListener("resize", e => {
-    console.log("resize");
-    parentWidth = parseInt(window.getComputedStyle(parent).getPropertyValue("width"));
-    parentHeight = parseInt(window.getComputedStyle(parent).getPropertyValue("height"));
+const updateWidthRatio = () => {
     widthRatio = parentWidth / childWidth;
+}
+const updateHeightRatio = () => {
     heightRatio = parentHeight / childHeight;
-
-})
-
-
+}
+const updateParentWidth = () => {
+    parentWidth = parseInt(window.getComputedStyle(parent).getPropertyValue("width"));
+}
+const updateParentHeight = () => {
+    parentHeight = parseInt(window.getComputedStyle(parent).getPropertyValue("height"));
+}
+const updateChildWidth = () => {
+    childWidth = parseInt(window.getComputedStyle(child).getPropertyValue("width"));
+}
+const updateChildHeight = () => {
+    childHeight = parseInt(window.getComputedStyle(child).getPropertyValue("height"));
+}
+const handleUpdate = () => {
+    updateParentWidth();
+    updateParentHeight();
+    updateChildWidth();
+    updateChildHeight();
+    updateWidthRatio();
+    updateHeightRatio();
+}
 const getParentMousePercentageX = (e) => {
     return ((e.clientX - parent.offsetLeft) / parentWidth) * 100;
 }
 const getParentMousePercentageY = (e) => {
     return ((e.clientY - parent.offsetTop) / parentHeight) * 100;
 }
-
-// document.addEventListener("mousemove", e => {
-//     const mousePercentageX = (e.clientX / window.innerWidth) * 100;
-//     const mousePercentageXParent = ((e.clientX) / window.innerWidth) * 100;
-//     console.log(mousePercentageX);
-//     console.log(`${getParentMousePercentageX(e)}`);
-// });
-
 
 const showCenterIndicator = () => {
     indicatorCenter.classList.remove("hide");
@@ -98,20 +79,17 @@ const showCenterIndicatorHorizontal = () => {
 const hideCenterIndicatorHorizontal = () => {
     indicatorCenterHorizontal.classList.add("hide");
 }
-
-
-
 const getParentMousePercentageXEx = (boxX) => {
     return ((boxX - parent.offsetLeft) / parentWidth) * 100;
 }
 const getParentMousePercentageYEx = (boxY) => {
     return ((boxY - parent.offsetTop) / parentHeight) * 100;
 }
-
-document.addEventListener("mousemove", e => {
-
-    //console.log(`${getParentMousePercentageY(e)}`);
-    
+const onMouseMoveStop = (e) => {
+    isMouseMoving = false;
+    stopAnimation();
+}
+const handleOnMouseMove = (e) => {
     clearTimeout(mouseMoveTimer);
     isMouseMoving = true;
     mouseMoveEvent = e;
@@ -121,21 +99,25 @@ document.addEventListener("mousemove", e => {
 
     mouseMoveTimer = setTimeout(() => {
         onMouseMoveStop(e);
-    }, 1000);
-});
-
-
-
-const onMouseMoveStop = (e) => {
-    isMouseMoving = false;
-    stopAnimation();
+    }, 3000);
 }
+
+handleUpdate();
+// event listeners------------
+document.addEventListener("mousemove", e => {
+    handleOnMouseMove(e);
+});
+window.addEventListener("resize", e => {
+    handleUpdate();
+});
+// -------------------
+
 
 
 const startAnimation = () => {
     if(!isMouseMoving || isAnimationPlaying) return false;
 
-    console.log("------animation-started-------------");
+    //console.log("------animation-started-------------");
     isAnimationPlaying = true;
     animate();
 }
@@ -143,7 +125,7 @@ const startAnimation = () => {
 const stopAnimation = () => {
     isAnimationPlaying = false;
     cancelAnimationFrame(animationRequestId);
-    console.log("------animation-stoped-------------");
+    //console.log("------animation-stoped-------------");
 }
 
 const transformBoxOnMouseMove = () => {
@@ -151,7 +133,7 @@ const transformBoxOnMouseMove = () => {
     var mousePercentageXParent = getParentMousePercentageXEx(boxX);
     var mousePercentageYParent = getParentMousePercentageYEx(boxY);
 
-    console.log(`${mousePercentageXParent}`);
+    //console.log(`${mousePercentageXParent}`);
 
     // for x coordinates--------------------------------------
     if(mousePercentageXParent <= 0) mousePercentageXParent = 0;
@@ -181,7 +163,6 @@ const transformBoxOnMouseMove = () => {
 
     rotation = mousePercentageXParent;
 
-
     child.style.setProperty("transform", `translate3d(
         ${(mousePercentageXParent*widthRatio)-mousePercentageXParent}%, 
         ${(mousePercentageYParent*heightRatio)-mousePercentageYParent}%, 
@@ -205,7 +186,7 @@ const animate = () => {
     boxX = boxX + (distX * speed);
     boxY = boxY + (distY * speed);
     
-    transformBoxOnMouseMove(mouseMoveEvent);
+    transformBoxOnMouseMove();
 
     if(isAnimationPlaying) animationRequestId = requestAnimationFrame(animate);
     
